@@ -1,20 +1,69 @@
+
 package com.example.coffeeorder
 
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import com.example.coffeeorder.databinding.ActivityMainBinding
+import com.example.coffeeorder.model.Order
+import com.example.coffeeorder.utils.toVnd
+import com.example.coffeeorder.utils.toast
+import com.example.coffeeorder.utils.trimmedText
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMainBinding
+
+    private val defaultOrder = Order(
+        id = "HD001",
+        customerName = "Ngô Thanh Nguyên",
+        productName = "Cà phê sữa",
+        quantity = 2,
+        price = 25000.0
+    )
+
+    private var currentOrder = defaultOrder
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(R.layout.activity_main)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        bindOrderData(currentOrder)
+
+        binding.btnUpdateQuantity.setOnClickListener {
+            val quantity = binding.edtQuantity
+                .trimmedText()
+                .toIntOrNull()
+
+            if (quantity == null || quantity !in 1..20) {
+                binding.edtQuantity.error =
+                    "Số lượng phải từ 1 đến 20"
+                return@setOnClickListener
+            }
+
+            currentOrder = currentOrder.copy(quantity = quantity)
+            bindOrderData(currentOrder)
+            toast("Cập nhật số lượng thành công")
+        }
+
+        binding.btnReset.setOnClickListener {
+            currentOrder = defaultOrder
+            bindOrderData(currentOrder)
+            toast("Đã khôi phục đơn hàng mặc định")
+        }
+    }
+
+    private fun bindOrderData(order: Order) {
+        with(binding) {
+            tvOrderId.text = "Mã đơn: ${order.id}"
+            tvCustomerName.text = "Khách hàng: ${order.customerName}"
+            tvProductName.text = "Tên món: ${order.productName}"
+            tvQuantity.text = "Số lượng: ${order.quantity}"
+            tvPrice.text = "Đơn giá: ${order.price.toVnd()}"
+            tvTotalPrice.text =
+                "Tổng tiền: ${order.totalPrice.toVnd()}"
+            edtQuantity.setText(order.quantity.toString())
         }
     }
 }
