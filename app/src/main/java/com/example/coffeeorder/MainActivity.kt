@@ -10,7 +10,9 @@ import com.example.coffeeorder.utils.toast
 import com.example.coffeeorder.utils.trimmedText
 
 class MainActivity : AppCompatActivity() {
-
+    companion object {
+        private const val KEY_ORDER = "KEY_ORDER"
+    }
     private lateinit var binding: ActivityMainBinding
 
     private val defaultOrder = Order(
@@ -22,13 +24,25 @@ class MainActivity : AppCompatActivity() {
     )
 
     private var currentOrder = defaultOrder
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
 
+        outState.putSerializable(
+            KEY_ORDER,
+            currentOrder
+        )
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        val savedOrder =
+            savedInstanceState?.getSerializable(KEY_ORDER) as? Order
 
+        if (savedOrder != null) {
+            currentOrder = savedOrder
+        }
         bindOrderData(currentOrder)
 
         binding.btnUpdateQuantity.setOnClickListener {
