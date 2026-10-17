@@ -1,6 +1,7 @@
 
 package com.example.coffeeorder
-
+import android.content.Intent
+import androidx.activity.result.contract.ActivityResultContracts
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.example.coffeeorder.databinding.ActivityMainBinding
@@ -32,6 +33,26 @@ class MainActivity : AppCompatActivity() {
             currentOrder
         )
     }
+    private val editOrderLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+
+            if (result.resultCode == RESULT_OK) {
+
+                val updatedOrder =
+                    result.data
+                        ?.getSerializableExtra(
+                            "UPDATED_ORDER"
+                        ) as? Order
+
+                if (updatedOrder != null) {
+                    currentOrder = updatedOrder
+                    bindOrderData(currentOrder)
+                    toast("Đã cập nhật đơn hàng")
+                }
+            }
+        }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -65,6 +86,21 @@ class MainActivity : AppCompatActivity() {
             currentOrder = defaultOrder
             bindOrderData(currentOrder)
             toast("Đã khôi phục đơn hàng mặc định")
+        }
+        binding.btnEditOrder.setOnClickListener {
+
+            val intent =
+                Intent(
+                    this,
+                    EditOrderActivity::class.java
+                )
+
+            intent.putExtra(
+                "EXTRA_ORDER",
+                currentOrder
+            )
+
+            editOrderLauncher.launch(intent)
         }
     }
 
