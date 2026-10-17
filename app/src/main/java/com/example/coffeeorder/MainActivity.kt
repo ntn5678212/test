@@ -9,7 +9,8 @@ import com.example.coffeeorder.model.Order
 import com.example.coffeeorder.utils.toVnd
 import com.example.coffeeorder.utils.toast
 import com.example.coffeeorder.utils.trimmedText
-
+import android.content.ActivityNotFoundException
+import android.net.Uri
 class MainActivity : AppCompatActivity() {
     companion object {
         private const val KEY_ORDER = "KEY_ORDER"
@@ -53,6 +54,24 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    private fun safeStartIntent(
+        intent: Intent,
+        title: String
+    ) {
+
+        try {
+            startActivity(
+                Intent.createChooser(
+                    intent,
+                    title
+                )
+            )
+        } catch (
+            e: ActivityNotFoundException
+        ) {
+            toast("Không có ứng dụng phù hợp")
+        }
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -101,6 +120,53 @@ class MainActivity : AppCompatActivity() {
             )
 
             editOrderLauncher.launch(intent)
+        }
+        binding.btnCall.setOnClickListener {
+
+            val intent =
+                Intent(Intent.ACTION_DIAL).apply {
+                    data = Uri.parse("tel:0905123456")
+                }
+
+            safeStartIntent(
+                intent,
+                "Chọn ứng dụng gọi điện"
+            )
+        }
+        binding.btnWebsite.setOnClickListener {
+
+            val intent =
+                Intent(Intent.ACTION_VIEW).apply {
+                    data = Uri.parse(
+                        "https://www.google.com"
+                    )
+                }
+
+            safeStartIntent(
+                intent,
+                "Chọn trình duyệt"
+            )
+        }
+        binding.btnEmail.setOnClickListener {
+
+            val intent =
+                Intent(Intent.ACTION_SENDTO).apply {
+
+                    data =
+                        Uri.parse(
+                            "mailto:coffee@example.com"
+                        )
+
+                    putExtra(
+                        Intent.EXTRA_SUBJECT,
+                        "Phản hồi đơn hàng ${currentOrder.id}"
+                    )
+                }
+
+            safeStartIntent(
+                intent,
+                "Chọn ứng dụng Email"
+            )
         }
     }
 
